@@ -27,8 +27,133 @@
             <p>Content coming soon.</p>
         </section>
         <section id="training-readiness" class="tab-panel">
-            <h2>Training Readiness</h2>
-            <p>Content coming soon.</p>
+             <h1>Training Readiness Check</h1>
+
+             <div class="questions-grid">
+                <!-- Question 1 -->
+                <div class="question">
+                    <p>How fatigued are you?</p>
+                    <select id="fatigue">
+                        <option value="" selected disabled>-- Select --</option>
+                        <option value="No Fatigue">No Fatigue</option>
+                        <option value="Minimal fatigue">Minimal fatigue</option>
+                        <option value="Better than normal">Better than normal</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Worse than Normal">Worse than Normal</option>
+                        <option value="Very fatigued">Very fatigued</option>
+                        <option value="Exhausted">Exhausted</option>
+                    </select>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="question">
+                    <p>How many hours did you sleep?</p>
+                    <select id="sleepHours">
+                        <option value="" selected disabled>-- Select --</option>
+                        <option value="Over 10 hours">Over 10 hours</option>
+                        <option value="9-10 hours">9-10 hours</option>
+                        <option value="8-9 hours">8-9 hours</option>
+                        <option value="7-8 hours">7-8 hours</option>
+                        <option value="5-6 hours">5-6 hours</option>
+                        <option value="4-5 hours">4-5 hours</option>
+                        <option value="less than 4">less than 4</option>
+                    </select>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="question">
+                    <p>How was your sleep last night ?</p>
+                    <select id="sleepQuality">
+                        <option value="" selected disabled>-- Select --</option>
+                        <option value="Outstanding">Outstanding</option>
+                        <option value="Very Good">Very Good</option>
+                        <option value="Better than Normal">Better than Normal</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Worse than Normal">Worse than Normal</option>
+                        <option value="Disrupted">Disrupted</option>
+                        <option value="Horrible">Horrible</option>
+                    </select>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="question">
+                    <p>Rate your level of muscle soreness</p>
+                    <select id="soreness">
+                        <option value="" selected disabled>-- Select --</option>
+                        <option value="No soreness">No soreness</option>
+                        <option value="Very little soreness">Very little soreness</option>
+                        <option value="Better than normal">Better than normal</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Worse than Normal">Worse than Normal</option>
+                        <option value="Very sore">Very sore</option>
+                        <option value="Extremely sore">Extremely sore</option>
+                    </select>
+                </div>
+
+                <!-- Question 5 -->
+                <div class="question">
+                    <p>How are you feeling mentally?</p>
+                    <select id="mentalState">
+                        <option value="" selected disabled>-- Select --</option>
+                        <option value="Feeling great-very relaxed">Feeling great-very relaxed</option>
+                        <option value="Feeling good-relaxed">Feeling good-relaxed</option>
+                        <option value="Better than normal">Better than normal</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Worse than Normal">Worse than Normal</option>
+                        <option value="Stressed">Stressed</option>
+                        <option value="Very Stressed">Very Stressed</option>
+                    </select>
+                </div>
+
+                <!-- Question 6 -->
+                <div class="question">
+                    <p>Do you have your HRV Data?</p>
+                    <select id="hasHrvData">
+                        <option value="" selected disabled>-- Select --</option>
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </div>
+
+                <!-- Question 7 & 8 (only if HRV data is available) -->
+                <div id="hrv-fields" class="hidden">
+                    <div class="question">
+                        <p>Monthly Average HRV</p>
+                        <input type="number" id="monthlyHrv">
+                    </div>
+
+                    <div class="question">
+                        <p>Current HRV</p>
+                        <input type="number" id="currentHrv">
+                    </div>
+                </div>
+
+                <!-- Question 9 -->
+                <div class="question">
+                    <p>Are you Male/Female?</p>
+                    <select id="gender">
+                        <option value="" selected disabled>-- Select --</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+
+                <!-- Question 10 (only for Female) -->
+                <div id="women-question" class="question hidden">
+                    <p>Where are you in your menstrual cycle?</p>
+                    <select id="cyclePhase">
+                        <option value="" selected disabled>-- Select --</option>
+                        <option value="Menstrual">Menstrual</option>
+                        <option value="Follicular">Follicular</option>
+                        <option value="Ovulation">Ovulation</option>
+                        <option value="Luteal">Luteal</option>
+                    </select>
+                </div>
+             </div>
+
+                <button id="submit-btn">Get my readiness</button>
+
+                <p id="readiness_result"></p>
         </section>
         <section id="blog" class="tab-panel">
             <h2>Blog</h2>

@@ -37,3 +37,12 @@ body {
 .tab-panel.active {
     display: block;
 }
+
+.hidden {
+    display: none !important;
+}
+
+.questions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+}

@@ -12,3 +12,84 @@ tabButtons.forEach((button) => {
         document.getElementById(button.dataset.tab).classList.add("active");
     });
 });
+
+// Show the HRV number fields only when the user says they have HRV data
+const hasHrvData = document.getElementById("hasHrvData");
+const hrvFields = document.getElementById("hrv-fields");
+
+hasHrvData.addEventListener("change", () => {
+    hrvFields.classList.toggle("hidden", hasHrvData.value !== "Yes");
+});
+
+// Show the menstrual cycle question only when the user selects Female
+const gender = document.getElementById("gender");
+const womenQuestion = document.getElementById("women-question");
+
+gender.addEventListener("change", () => {
+    womenQuestion.classList.toggle("hidden", gender.value !== "Female");
+});
+
+// Handle the readiness form submission
+const submitButton = document.getElementById("submit-btn");
+const readiness_result = document.getElementById("readiness_result");
+
+const alwaysRequiredFields = [
+    "fatigue",
+    "sleepHours",
+    "sleepQuality",
+    "soreness",
+    "mentalState",
+    "hasHrvData",
+    "gender",
+];
+
+function allFieldsAnswered() {
+    const requiredFields = [...alwaysRequiredFields];
+
+    if (hasHrvData.value === "Yes") {
+        requiredFields.push("monthlyHrv", "currentHrv");
+    }
+
+    if (gender.value === "Female") {
+        requiredFields.push("cyclePhase");
+    }
+
+    return requiredFields.every((id) => document.getElementById(id).value !== "");
+}
+
+function collectAnswers() {
+    const answers = {};
+    const fieldIds = [...alwaysRequiredFields];
+
+    if (hasHrvData.value === "Yes") {
+        fieldIds.push("monthlyHrv", "currentHrv");
+    }
+
+    if (gender.value === "Female") {
+        fieldIds.push("cyclePhase");
+    }
+
+    fieldIds.forEach((id) => {
+        answers[id] = document.getElementById(id).value;
+    });
+
+    return answers;
+}
+
+submitButton.addEventListener("click", async () => {
+    if (!allFieldsAnswered()) {
+        readiness_result.textContent = "Please answer all fields.";
+        return;
+    }
+
+    // Flask runs on its own port, separate from Live Server's port,
+    // so the full address is needed instead of a relative path.
+    const response = await fetch("http://127.0.0.1:5000/api/readiness", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(collectAnswers()),
+    });
+    const data = await response.json();
+
+    readiness_result.textContent = `Training Readiness: ${data.readiness}%`;
+});
