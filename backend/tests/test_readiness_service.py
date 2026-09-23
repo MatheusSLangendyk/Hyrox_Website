@@ -8,28 +8,59 @@ def test_returns_dict_with_readiness_key():
     assert "readiness" in result
 
 
-def test_placeholder_always_returns_100():
+def test_lack_input_error():
     # Current implementation is a placeholder; update this test when
     # real scoring lands.
-    assert calculate_readiness({})["readiness"] == 100
-    assert calculate_readiness({"fatigue": "Exhausted"})["readiness"] == 100
+    result =  calculate_readiness({})
+    assert result["readiness"] == None
+    result = calculate_readiness({"fatigue": "Exhausted"})
+    assert result["readiness"] == None
 
+def test_hrv_range():
+    # Current implementation is a placeholder; update this test when
+    # real scoring lands.
+    assert calculate_readiness({"monthlyHrv": "-1"})["readiness"] == None
+    assert calculate_readiness({"monthlyHrv": "501"})["readiness"] == None
 
 @pytest.mark.parametrize(
     "answers",
     [
-        {},
-        {"fatigue": "Normal"},
-        {
-            "fatigue": "Normal",
-            "sleepHours": "7-8 hours",
-            "sleepQuality": "Normal",
-            "soreness": "Normal",
-            "mentalState": "Normal",
-            "hasHrvData": "No",
-            "gender": "Male/No Menstrual Cycle",
-        },
-    ],
+        {"fatigue": "Normal",
+                    "sleepHours": "7-8 hours",
+                    "sleepQuality": "Normal",
+                    "soreness": "Normal",
+                    "mentalState": "Stressed",
+                    "hasHrvData": "No",
+                    "monthlyHrv": 100,
+                    "currentHrv": 100,
+                    "gender": "Male/No Menstrual Cycle",},
+        {"fatigue": "Normal",
+                    "sleepHours": "7-8 hours",
+                    "sleepQuality": "Normal",
+                    "soreness": "Normal",
+                    "mentalState": "Normal",
+                    "hasHrvData": "Yes",
+                    "gender": "Male/No Menstrual Cycle",},
+
+        {"fatigue": "Normal",
+                    "sleepHours": "7-8 hours",
+                    "sleepQuality": "Normal",
+                    "soreness": "Normal",
+                    "mentalState": "Normal",
+                    "hasHrvData": "No",
+                    "gender": "Known Menstrual Cycle",
+                    "cyclePhase": "Luteal"},
+
+        {"fatigue": "Normal",
+                    "sleepHours": "7-8 hours",
+                    "sleepQuality": "Normal",
+                    "soreness": "Normal",
+                    "mentalState": "Normal",
+                    "hasHrvData": "Yes",
+                    "monthlyHrv": 100,
+                    "currentHrv": 100,
+                    "gender": "Known Menstrual Cycle",
+                    "cyclePhase": "Luteal"}],
 )
 def test_accepts_various_answer_shapes(answers):
     result = calculate_readiness(answers)
