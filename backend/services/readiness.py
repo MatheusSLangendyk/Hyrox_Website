@@ -9,3 +9,4 @@ def calculate_readiness(answers: dict) -> dict:
     logic (per-answer points and weighting) will replace this body.
     """
     return {"readiness": 100}
+

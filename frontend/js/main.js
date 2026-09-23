@@ -84,7 +84,7 @@ submitButton.addEventListener("click", async () => {
 
     // Flask runs on its own port, separate from Live Server's port,
     // so the full address is needed instead of a relative path.
-    const response = await fetch("http://127.0.0.1:5000/api/readiness", {
+    const response = await fetch("http://127.0.0.1:5001/api/readiness", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(collectAnswers()),
