@@ -25,13 +25,13 @@ REQUIRED_ANSWERS = {"hasHrvData": "Yes", "gender": "Male/No Menstrual Cycle"}
 def test_hrv_range(out_of_range):
     result = calculate_readiness({**REQUIRED_ANSWERS, "monthlyHrv": out_of_range})
     assert result["readiness"] == None
-    assert result["error"] == "monthlyHrv out of range"
+    assert result["error"] == "Given HRV must be between 1 and 500"
 
 @pytest.mark.parametrize("bad_value", ["abc", "", None])
 def test_hrv_not_a_number(bad_value):
     result = calculate_readiness({**REQUIRED_ANSWERS, "currentHrv": bad_value})
     assert result["readiness"] == None
-    assert result["error"] == "currentHrv is not a number"
+    assert result["error"] == "Given HRV is not a number"
 
 @pytest.mark.parametrize(
     "answers",
