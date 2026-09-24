@@ -16,11 +16,22 @@ def test_lack_input_error():
     result = calculate_readiness({"fatigue": "Exhausted"})
     assert result["readiness"] == None
 
-def test_hrv_range():
-    # Current implementation is a placeholder; update this test when
-    # real scoring lands.
-    assert calculate_readiness({"monthlyHrv": "-1"})["readiness"] == None
-    assert calculate_readiness({"monthlyHrv": "501"})["readiness"] == None
+# The minimum answers needed to get past the completeness check,
+# so the tests below really reach the HRV validation.
+REQUIRED_ANSWERS = {"hasHrvData": "Yes", "gender": "Male/No Menstrual Cycle"}
+
+
+@pytest.mark.parametrize("out_of_range", ["-1", "501"])
+def test_hrv_range(out_of_range):
+    result = calculate_readiness({**REQUIRED_ANSWERS, "monthlyHrv": out_of_range})
+    assert result["readiness"] == None
+    assert result["error"] == "monthlyHrv out of range"
+
+@pytest.mark.parametrize("bad_value", ["abc", "", None])
+def test_hrv_not_a_number(bad_value):
+    result = calculate_readiness({**REQUIRED_ANSWERS, "currentHrv": bad_value})
+    assert result["readiness"] == None
+    assert result["error"] == "currentHrv is not a number"
 
 @pytest.mark.parametrize(
     "answers",

@@ -11,16 +11,27 @@ def calculate_readiness(answers: dict) -> dict:
             dict: A dictionary containing the calculated readiness score.
 
     """
-    # Validate HRV ranges
-    if "monthlyHrv" in answers:  # noqa: SIM102
-        if float(answers["monthlyHrv"]) < 0 or float(answers["monthlyHrv"]) > 500:
-            return {"readiness": None, "error": "monthlyHrv out of range"}
-    if "currentHrv" in answers:  # noqa: SIM102
-            if float(answers["currentHrv"]) < 0 or float(answers["currentHrv"]) > 500:
-                return {"readiness": None, "error": "currentHrv out of range"}
-    #Validate Input completeness
+    # Step 1: are all required answers there?
     if "hasHrvData" not in answers or "gender" not in answers:
         return {"readiness": None, "error": "missing hasHrvData or gender"}
+
+    # Step 2: are the values valid?
+    if "monthlyHrv" in answers:
+        # float() raises ValueError for text like "abc" or "" and TypeError
+        # for None. Catch both so bad input gives a clear error, not a crash.
+        try:
+            monthly_hrv = float(answers["monthlyHrv"])
+        except (ValueError, TypeError):
+            return {"readiness": None, "error": "Given HRV is not a number"}
+        if monthly_hrv < 0 or monthly_hrv > 500:
+            return {"readiness": None, "error": "Given HRV out of range"}
+    if "currentHrv" in answers:
+        try:
+            current_hrv = float(answers["currentHrv"])
+        except (ValueError, TypeError):
+            return {"readiness": None, "error": "Given HRV is not a number"}
+        if current_hrv < 0 or current_hrv > 500:
+            return {"readiness": None, "error": "Given HRV out of range"}
 
     if answers["hasHrvData"] == "No" and answers["gender"] == "Male/No Menstrual Cycle":
         # Type 1, only basis data

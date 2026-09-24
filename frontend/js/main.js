@@ -26,7 +26,7 @@ const gender = document.getElementById("gender");
 const womenQuestion = document.getElementById("women-question");
 
 gender.addEventListener("change", () => {
-    womenQuestion.classList.toggle("hidden", gender.value !== "Female");
+    womenQuestion.classList.toggle("hidden", gender.value !== "Known Menstrual Cycle");
 });
 
 // Handle the readiness form submission
@@ -50,7 +50,7 @@ function allFieldsAnswered() {
         requiredFields.push("monthlyHrv", "currentHrv");
     }
 
-    if (gender.value === "Female") {
+    if (gender.value === "Known Menstrual Cycle") {
         requiredFields.push("cyclePhase");
     }
 
@@ -65,7 +65,7 @@ function collectAnswers() {
         fieldIds.push("monthlyHrv", "currentHrv");
     }
 
-    if (gender.value === "Female") {
+    if (gender.value === "Known Menstrual Cycle") {
         fieldIds.push("cyclePhase");
     }
 
@@ -90,6 +90,13 @@ submitButton.addEventListener("click", async () => {
         body: JSON.stringify(collectAnswers()),
     });
     const data = await response.json();
+
+    // response.ok is true for 2xx status codes and false for errors like 400,
+    // so the backend's error message is shown instead of "null%".
+    if (!response.ok) {
+        readiness_result.textContent = `Error: ${data.error}`;
+        return;
+    }
 
     readiness_result.textContent = `Training Readiness: ${data.readiness}%`;
 });
