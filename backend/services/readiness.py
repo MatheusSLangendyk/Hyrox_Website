@@ -20,7 +20,52 @@ LOOK_UP_TABLE = [
     ["Exhausted",           "less than 4",   "Horrible",           "Extremely sore",       "Very Stressed",              10.0],
 ]
 
+# ratio = current_hrv / monthly_hrv
+HRV_LOOK_UP_TABLE = [
+    (0, 25),
+    (0.2, 25),
+    (0.50, 50),   # ratio < 0.50
+    (0.80, 70),   # ratio < 0.80
+    (0.90, 100),   # 0.80 <= ratio < 0.90
+    (1.00, 100),   # 0.90 <= ratio < 1.00
+    (float("inf"), 100),  # ratio >= 1.10  (inf = "everything above")
+]
+
+# cycle phase -> readiness
+# The phases must match the <option value="..."> strings in index.html.
+MENSTRUAL_LOOK_UP_TABLE = {
+    "Menstrual":  75,
+    "Follicular": 100,
+    "Ovulation":  100,
+    "Luteal":     80,
+}
+
 BASELINE_GRADE = 4.0 #Grade by which the readiness is still 100 %
+
+
+def interpolate_hrv_readiness(ratio: float) -> float:
+    """Look up the readiness for an HRV ratio in HRV_LOOK_UP_TABLE.
+
+    Between two table points the readiness is linearly interpolated,
+    e.g. with (0.5, 50) and (0.8, 70) a ratio of 0.65 gives 60.
+    """
+    for i in range(len(HRV_LOOK_UP_TABLE) - 1):
+        lower_ratio, lower_readiness = HRV_LOOK_UP_TABLE[i]
+        upper_ratio, upper_readiness = HRV_LOOK_UP_TABLE[i + 1]
+
+        if lower_ratio <= ratio < upper_ratio:
+            # The last point is infinity: nothing to interpolate towards,
+            # so everything above the last real point keeps its readiness.
+            if upper_ratio == float("inf"):
+                return lower_readiness
+
+            # How far the ratio lies between the two points (0.0 to 1.0)
+            fraction = (ratio - lower_ratio) / (upper_ratio - lower_ratio)
+            return lower_readiness + fraction * (upper_readiness - lower_readiness)
+
+    # Ratio below the first table point: use the first readiness
+    return HRV_LOOK_UP_TABLE[0][1]
+
 
 def calculate_readiness(answers: dict) -> dict:
     """Turn a set of readiness answers into a readiness score between 0-100 %.
@@ -31,6 +76,12 @@ def calculate_readiness(answers: dict) -> dict:
             dict: A dictionary containing the calculated readiness score.
 
     """
+    #Step 0 Initialize Data
+    monthly_hrv = None
+    current_hrv = None
+    hrv_readiness = None
+    menstrual_readiness = None
+
     # Step 1: are all required answers there?
     if "hasHrvData" not in answers or "gender" not in answers:
         return {"readiness": None, "error": "missing hasHrvData or gender"}
@@ -45,6 +96,7 @@ def calculate_readiness(answers: dict) -> dict:
             return {"readiness": None, "error": "Given HRV is not a number"}
         if monthly_hrv < 1 or monthly_hrv > 500:
             return {"readiness": None, "error": "Given HRV must be between 1 and 500"}
+   
     if "currentHrv" in answers:
         try:
             current_hrv = float(answers["currentHrv"])
@@ -67,16 +119,29 @@ def calculate_readiness(answers: dict) -> dict:
     baseline_readiness = 100*min(1.0, BASELINE_GRADE*NUMBER_OF_BASELINE_QUESTIONS/total_grade)
     # Step 4: Calculate readiness based on the available data
     # (use LOOK_UP_TABLE, defined at the top of this file)
+    #Calculate HRV based readiness
+    
+    if monthly_hrv is not None and current_hrv is not None:
+        hrv_readiness = interpolate_hrv_readiness(current_hrv / monthly_hrv)
+    if "cyclePhase" in answers:
+        cycle_phase = answers["cyclePhase"]
+        menstrual_readiness = float(MENSTRUAL_LOOK_UP_TABLE[cycle_phase])
+   
+   
     if answers["hasHrvData"] == "No" and answers["gender"] == "Male/No Menstrual Cycle":
         # Type 1, only basis data
         readiness = baseline_readiness
     elif answers["hasHrvData"] == "Yes" and answers["gender"] == "Male/No Menstrual Cycle":
         # Type 2, has HRV data, no menstrual cycle
-        readiness = baseline_readiness
+        if hrv_readiness is None:
+            # "Yes" was selected but no HRV values were sent
+            readiness = baseline_readiness
+        else:
+            readiness = 0.5*baseline_readiness + 0.5*hrv_readiness
     elif answers["hasHrvData"] == "Yes" and answers["gender"] == "Known Menstrual Cycle":
         # Type 3, has HRV data,  menstrual cycle
-        readiness = baseline_readiness
+        readiness = (baseline_readiness + menstrual_readiness + hrv_readiness) / 3
     else:
         # Type 4, no HRV data, known menstrual cycle
-        readiness = baseline_readiness
-    return {"readiness": readiness}
+        readiness = baseline_readiness*0.5 + menstrual_readiness*0.5
+    return {"readiness": int(readiness)}
