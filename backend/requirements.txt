@@ -1,3 +1,11 @@
 flask
 flask-cors
 pandas
+
+# Used by data/import_raw_data.py to download results from hyresult.com
+requests
+tqdm
+country_converter
+
+# Only needed to run the tests in backend/tests
+pytest
