@@ -1,18 +1,20 @@
 
-#
-
-
 import json
 import math
 import re
 import time
-
 import requests
+import truststore
+
+# Check HTTPS certificates with the Windows certificate store instead of
+# Python's own list. Needed on networks with a company proxy, whose
+# certificate only Windows trusts.
+truststore.inject_into_ssl()
 
 BASE_URL = "https://www.hyresult.com"
 
 # Wait between two requests so we do not overload the website.
-DELAY_BETWEEN_REQUESTS_SECONDS = 1.0
+DELAY_BETWEEN_REQUESTS_SECONDS = 2
 REQUEST_TIMEOUT_SECONDS = 30
 ATHLETES_PER_RANKING_PAGE = 100
 

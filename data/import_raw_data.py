@@ -5,8 +5,9 @@
 # How it works:
 #   1. Count the event folders that already exist in RawData.
 #   2. If that is fewer than NUMBER_OF_EVENTS, walk through the event
-#      calendar from the newest month backwards and import finished events
-#      until NUMBER_OF_EVENTS folders exist.
+#      calendar from the newest month backwards and import every
+#      IMPORT_EVERY_NTH_EVENT-th finished event until NUMBER_OF_EVENTS
+#      folders exist.
 #   3. Per event: download the ranking of every wanted division, take every
 #      IMPORT_EVERY_NTH_ATHLETE-th finisher and download their split times.
 #
@@ -18,7 +19,6 @@ import sys
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
-
 import country_converter
 import pandas as pd
 from tqdm import tqdm
@@ -30,7 +30,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from utils.time_conversion import convert_seconds_to_minutes  # noqa: E402
 
 
-NUMBER_OF_EVENTS = 50  # total number of event folders wanted in RawData
+NUMBER_OF_EVENTS = 63  # total number of event folders wanted in RawData
+
+IMPORT_EVERY_NTH_EVENT = 10  # newest, 11th newest, 21st newest, ... -> events spread over time
 
 IMPORT_EVERY_NTH_ATHLETE = 10  # rank 1, 11, 21, ... -> athletes of every level
 
@@ -245,7 +247,12 @@ def main() -> None:
    
     with tqdm(total=events_to_import, unit="event") as progress_bar:
         imported = 0
-        for event in find_events_newest_first():
+        # enumerate() numbers the events 0, 1, 2, ... in calendar order. We count
+        # every finished event (also existing ones), so each run picks the same events.
+        for event_number, event in enumerate(find_events_newest_first()):
+            if event_number % IMPORT_EVERY_NTH_EVENT != 0:
+                continue  # only event 0, 10, 20, ... is imported
+
             event_folder = RAW_DATA_FOLDER / make_folder_name(event["city"], event["start_date"][:4])
             if event_folder.exists():
                 progress_bar.write(f"{event['name']}: folder {event_folder.name} exists already, skipped.")

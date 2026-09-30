@@ -6,6 +6,7 @@ pandas
 requests
 tqdm
 country_converter
+truststore
 
 # Only needed to run the tests in backend/tests
 pytest
