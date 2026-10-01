@@ -1,0 +1,3 @@
+python -m venv .venv                                        # create the environment
+.venv\Scripts\python.exe -m pip install -r backend\requirements.txt   # install the packages
+.venv\Scripts\python.exe data\import_raw_data.py
